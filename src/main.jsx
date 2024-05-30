@@ -1,5 +1,10 @@
-import ReactDOM from "react-dom/client"
-import App from "./App"
-import "./index.css"
+import ReactDom from "react-dom/client";
+import App from "./App";
+import "./index.css";
+import { BrowserRouter as Router } from "react-router-dom";
 
-ReactDOM.createRoot(document.querySelector("#root")).render(<App/>)
+ReactDom.createRoot(document.querySelector("#root")).render(
+  <Router>
+    <App />
+  </Router>
+);

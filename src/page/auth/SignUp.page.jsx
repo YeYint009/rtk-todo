@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ErrorMessage, Form, Formik } from "formik";
 import { Button } from "../../components/ui/button";
 import {
@@ -11,19 +11,35 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import * as yup from "yup";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSignUpMutation } from "../../store/services/endpoints/auth.endpoint";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const SignUpPage = () => {
-  const initialValue = {
+  const [fun, data] = useSignUpMutation();
+  const { toast } = useToast();
+  const nav = useNavigate();
+  const initialValues = {
     name: "",
     email: "",
     password: "",
-    confirm_password: "",
+    password_confirmation: "",
   };
-  const handleSubmit = (value) => {
-    console.log(value);
+  const handleSubmit = async (value, action) => {
+    await fun(value);
   };
 
+  useEffect(() => {
+    if (data.error) {
+      toast({
+        title: "Error From Server",
+        description: data.error.data.message,
+      });
+    }else if(data.data){
+      nav("/")
+    }
+  }, [data]);
   const validationSchema = yup.object({
     name: yup
       .string()
@@ -38,9 +54,9 @@ const SignUpPage = () => {
     password: yup
       .string()
       .required("Password is Required")
-      .min(8,"Password needs 8 letters"),
+      .min(8, "Password needs 8 letters"),
 
-    confirm_password: yup
+    password_confirmation: yup
       .string()
       .required("Confirmation is Required")
       .oneOf([yup.ref("password"), null], "Should be match with password"),
@@ -52,8 +68,7 @@ const SignUpPage = () => {
         <CardHeader className="flex flex-row justify-between  mb-5">
           <CardTitle>Sign Up</CardTitle>
           <CardDescription className="text-blue-400">
-            <Link to="/">
-            Already have an account?  </Link>
+            <Link to="/">Already have an account? </Link>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -61,7 +76,7 @@ const SignUpPage = () => {
             validateOnBlur={false}
             validateOnChange={false}
             validationSchema={validationSchema}
-            initialValues={initialValue}
+            initialValues={initialValues}
             onSubmit={handleSubmit}
           >
             {({ handleBlur, values, handleChange, isSubmitting }) => (
@@ -74,7 +89,7 @@ const SignUpPage = () => {
                     value={values.name}
                     type="text"
                     name="name"
-                    id="Name"
+                    id="name"
                     placeholder="Your Name"
                   />
 
@@ -119,25 +134,28 @@ const SignUpPage = () => {
                   <Input
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    value={values.confirm_password}
+                    value={values.password_confirmation}
                     type="password"
-                    name="confirm_password"
-                    id="confirm_password"
+                    name="password_confirmation"
+                    id="password_confirmation"
                     placeholder="type your password again"
                   />
 
                   <ErrorMessage
                     className="text-danger text-sm"
                     component={"p"}
-                    name="confirm_password"
+                    name="password_confirmation"
                   />
 
                   <Button
-                    disabled = {isSubmitting}
+                    disabled={isSubmitting}
                     className=" bg-blue-500 w-full mt-3"
                     type="Submit"
                   >
                     Sign Up
+                    {isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                   </Button>
                 </Form>
               </>

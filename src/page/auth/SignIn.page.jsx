@@ -12,14 +12,19 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import * as yup from "yup";
 import { Link } from "react-router-dom";
+import { useSignInMutation } from "../../store/services/endpoints/auth.endpoint";
+import { Loader2 } from "lucide-react";
 
 const SignInPage = () => {
+  const [fun, data] = useSignInMutation();
+  console.log(data);
   const initialValue = {
     email: "",
     password: "",
   };
-  const handleSubmit = (value) => {
-    console.log(value);
+  const handleSubmit = async (value, action) => {
+    await fun(value);
+    action.reset();
   };
 
   const validationSchema = yup.object({
@@ -31,7 +36,7 @@ const SignInPage = () => {
     password: yup
       .string()
       .required("Password is Required")
-      .min("Password needs 8 letters"),
+      .min(8, "Password needs 8 letters"),
   });
 
   return (
@@ -40,9 +45,7 @@ const SignInPage = () => {
         <CardHeader className="flex flex-row justify-between  mb-5">
           <CardTitle>Sign In</CardTitle>
           <CardDescription className="text-blue-400">
-            <Link to="signUpPage">
-            I don't have an account?
-            </Link>
+            <Link to="signUpPage">I don't have an account?</Link>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,8 +89,15 @@ const SignInPage = () => {
                     name="password"
                   />
 
-                  <Button disable={isSubmitting} className=" bg-blue-500 w-full mt-3" type="Submit">
-                    Sign In
+                  <Button
+                    disabled={isSubmitting}
+                    className=" bg-blue-500 w-full mt-3"
+                    type="Submit"
+                  >
+                    Sign In{" "}
+                    {isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                   </Button>
                 </Form>
               </>
